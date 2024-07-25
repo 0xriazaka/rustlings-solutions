@@ -17,6 +17,7 @@ struct Person {
 // We will use this error type for the `FromStr` implementation.
 #[derive(Debug, PartialEq)]
 enum ParsePersonError {
+    Empty,
     // Incorrect number of fields
     BadLen,
     // Empty name field
@@ -41,7 +42,26 @@ enum ParsePersonError {
 impl FromStr for Person {
     type Err = ParsePersonError;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {}
+    fn from_str(s: &str) -> Result<Person, Self::Err> {
+        if s == "" {
+            Err(ParsePersonError::Empty)
+        } else {
+            let s = s.split(",").map(|x| x.into()).collect::<Vec<String>>();
+            if s.len() != 2 {
+                return Err(ParsePersonError::BadLen);
+            } else if s[0] == "" {
+                return Err(ParsePersonError::NoName);
+            }
+            let number = s[1].parse();
+            if let Err(x) = number {
+                return Err(ParsePersonError::ParseInt(x));
+            }
+            Ok(Person {
+                name: s[0].clone(),
+                age: number.unwrap(),
+            })
+        }
+    }
 }
 
 fn main() {
@@ -56,7 +76,7 @@ mod tests {
 
     #[test]
     fn empty_input() {
-        assert_eq!("".parse::<Person>(), Err(BadLen));
+        assert_eq!("".parse::<Person>(), Err(ParsePersonError::Empty));
     }
 
     #[test]

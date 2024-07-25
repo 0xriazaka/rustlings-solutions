@@ -1,6 +1,6 @@
 fn main() {
     // TODO: Add missing keyword.
-    x = 5;
+    const x: i64 = 5;
 
-    println!("x has the value {x}");
+    println!("x has the value {}", x);
 }
